@@ -42,7 +42,7 @@ public class MouseCursorView extends View {
     private void setBitmap(Context context) {
         BitmapDrawable bp = (BitmapDrawable) ContextCompat.getDrawable(context, pointerDrawableReference);
         Bitmap originalBitmap = bp.getBitmap();
-        BitmapDrawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(originalBitmap, 50 * pointerSizeReference, 50 * pointerSizeReference, true));
+        BitmapDrawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(originalBitmap, 10 * pointerSizeReference, 10 * pointerSizeReference, true));
         mPointerBitmap = d.getBitmap();
     }
 
