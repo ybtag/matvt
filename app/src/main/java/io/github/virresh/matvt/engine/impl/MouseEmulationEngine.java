@@ -308,17 +308,20 @@ public class MouseEmulationEngine {
         }
         boolean consumed = false;
         if (keyEvent.getAction() == KeyEvent.ACTION_DOWN){
+            //Log.i(LOG_TAG, "goteventdown");
             if (scrollCodeMap.containsKey(keyEvent.getKeyCode())) {
                 if (isInScrollMode || colorSet.contains(keyEvent.getKeyCode()))
                     attachGesture(mPointerControl.getPointerLocation(), scrollCodeMap.get(keyEvent.getKeyCode()));
                 else if (!isInScrollMode && stuckAtSide != 0 && keyEvent.getKeyCode() == stuckAtSide)
                     createSwipeForSingle(mPointerControl.getCenterPointOfView(), scrollCodeMap.get(keyEvent.getKeyCode()));
                 else if (movementCodeMap.containsKey(keyEvent.getKeyCode()))
+                    Log.i(LOG_TAG, "setting timer");
                     attachTimer(movementCodeMap.get(keyEvent.getKeyCode()));
                 consumed = true;
             }
-            else if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+            else if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 // just consume this event to prevent propagation
+                Log.i(LOG_TAG, "consuming center");
                 DPAD_Center_Init_Point = new Point((int) mPointerControl.getPointerLocation().x, (int) mPointerControl.getPointerLocation().y);
                 DPAD_SELECT_PRESSED = true;
                 consumed = true;
@@ -327,19 +330,24 @@ public class MouseEmulationEngine {
         else if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
             // key released, cancel any ongoing effects and clean-up
             // since bossKey is also now a part of this stuff, consume it if events enabled
+            //Log.i(LOG_TAG, "keyup " + keyEvent.getKeyCode());
             if (actionableKeyMap.contains(keyEvent.getKeyCode())
                     || keyEvent.getKeyCode() == bossKey) {
+              //  Log.i(LOG_TAG, "detaching timer");
                 detachPreviousTimer();
                 consumed = true;
             }
-            else if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+            else if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 DPAD_SELECT_PRESSED = false;
+                //Log.i(LOG_TAG, "clicked");
                 detachPreviousTimer();
 //                if (keyEvent.getEventTime() - keyEvent.getDownTime() > 500) {
                     // unreliable long click event if button was pressed for more than 500 ms
                 int action = AccessibilityNodeInfo.ACTION_CLICK;
                 Point pInt = new Point((int) mPointerControl.getPointerLocation().x, (int) mPointerControl.getPointerLocation().y);
+                Log.i(LOG_TAG, "point at " + mPointerControl.getPointerLocation().x +"," + mPointerControl.getPointerLocation().y);
                 if (DPAD_Center_Init_Point.equals(pInt)) {
+                //    Log.i(LOG_TAG, "proper point");
                     List<AccessibilityWindowInfo> windowList = mService.getWindows();
                     boolean wasIME = false, focused = false;
                     for (AccessibilityWindowInfo window : windowList) {
@@ -355,12 +363,18 @@ public class MouseEmulationEngine {
                             AccessibilityNodeInfo hitNode = nodeHierarchy.get(i);
                             List<AccessibilityNodeInfo.AccessibilityAction> availableActions = hitNode.getActionList();
                             if (availableActions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS)) {
-                                focused = hitNode.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+                                //focused = hitNode.performAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
+                                consumed = hitNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                                Log.i(LOG_TAG, "focusable node");
                             }
                             if (hitNode.isFocused() && availableActions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SELECT)) {
-                                hitNode.performAction(AccessibilityNodeInfo.ACTION_SELECT);
+                                //hitNode.performAction(AccessibilityNodeInfo.ACTION_SELECT);
+                                consumed = hitNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                                Log.i(LOG_TAG, "selectable node");
                             }
                             if (hitNode.isFocused() && availableActions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
+                                Log.i(LOG_TAG, "clickable node found");
+
                                 consumed = hitNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                             }
                             if (window.getType() == AccessibilityWindowInfo.TYPE_INPUT_METHOD && !(hitNode.getPackageName()).toString().contains("leankeyboard")) {
@@ -370,11 +384,11 @@ public class MouseEmulationEngine {
                                     consumed = wasIME = true;
                                 } else {
                                     wasIME = true;
+                                    Log.i(LOG_TAG, "clicked IME");
                                     consumed = hitNode.performAction(AccessibilityNodeInfo.ACTION_CLICK);
                                 }
                                 break;
                             }
-
                             if ((hitNode.getPackageName().equals("com.google.android.tvlauncher")
                                     && availableActions.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK))) {
                                 if (hitNode.isFocusable()) {
@@ -385,6 +399,7 @@ public class MouseEmulationEngine {
                         }
                     }
                     if (!consumed && !wasIME) {
+
                         mService.dispatchGesture(createClick(mPointerControl.getPointerLocation(), keyEvent.getEventTime() - keyEvent.getDownTime()), null, null);
                     }
                 }

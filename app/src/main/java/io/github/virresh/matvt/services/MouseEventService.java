@@ -6,6 +6,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.Toast;
 
 import io.github.virresh.matvt.BuildConfig;
 import io.github.virresh.matvt.engine.impl.MouseEmulationEngine;
@@ -33,6 +34,7 @@ public class MouseEventService extends AccessibilityService {
         if (Helper.isAnotherServiceInstalled(this) &&
                 event.getKeyCode() == KeyEvent.KEYCODE_HOME) return true;
         if (Helper.isOverlayDisabled(this)) return false;
+        //Log.i(TAG_NAME, "continued");
         return mEngine.perform(event);
     }
 
