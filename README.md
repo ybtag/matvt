@@ -14,6 +14,7 @@ All kinds of contributions are welcome. Two ways of contributing:
 
 # Credits
 A very big Thank you to [@virresh](https://github.com/virresh) for making the MATVT app and all his hard work maintaining it!
+
 Thanks to EVA Facial Mouse for open sourcing their code. I've taken lots of ideas from their codebase. You can check them out at https://github.com/cmauri/eva_facial_mouse  
 Thanks to [@sweenwolf](https://github.com/sweenwolf) for making this app work on remotes with less buttons, and for the app icons, fully transparent cursor images, boss key autodetect and autoscroll on borders!    
 Thanks to TechDoctorUK for making a demo video  
