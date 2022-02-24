@@ -2,7 +2,7 @@
 This is an attempt to get MATVT to work on the Sonim XP3plus flip phone, despite Google's mistakenly breaking the API in Android 11.
 See [here](https://github.com/virresh/matvt/issues/28#issuecomment-1020814825) for more details.
 
-So far, the mouse works sometimes for clicking, and not at all for scrolling
+So far, the mouse works sometimes for clicking, and not at all for scrolling.
 
 # Reporting Bugs
 Please do not report bugs from this fork to @virresh. This is an experimental, hacky and independent fork.
