@@ -35,3 +35,4 @@ Use adb to install the app. Then run these commands:
   adb tcpip 5555
   ```
 
+Unfortunately in Android 11 the tcpip port of Wireless debugging is randomized, so it's necessary to input adb tcpip 5555 on the PC every time the phone is started. I would have to build a port scanner to avoid this.
