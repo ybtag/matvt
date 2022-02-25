@@ -42,7 +42,8 @@ public class MouseCursorView extends View {
     private void setBitmap(Context context) {
         BitmapDrawable bp = (BitmapDrawable) ContextCompat.getDrawable(context, pointerDrawableReference);
         Bitmap originalBitmap = bp.getBitmap();
-        BitmapDrawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(originalBitmap, 50 * pointerSizeReference, 50 * pointerSizeReference, true));
+        // ybtag - changed the scale to 20 to be more suitable for flipphones
+        BitmapDrawable d = new BitmapDrawable(getResources(), Bitmap.createScaledBitmap(originalBitmap, 20 * pointerSizeReference, 20 * pointerSizeReference, true));
         mPointerBitmap = d.getBitmap();
     }
 

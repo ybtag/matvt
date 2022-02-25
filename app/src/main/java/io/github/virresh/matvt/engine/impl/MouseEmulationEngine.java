@@ -339,7 +339,8 @@ public class MouseEmulationEngine {
                     attachTimer(movementCodeMap.get(keyEvent.getKeyCode()));
                 consumed = true;
             }
-            else if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+            else if(keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER
+                    || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 // just consume this event to prevent propagation
                 DPAD_Center_Init_Point = new Point((int) mPointerControl.getPointerLocation().x, (int) mPointerControl.getPointerLocation().y);
                 DPAD_SELECT_PRESSED = true;
@@ -354,7 +355,8 @@ public class MouseEmulationEngine {
                 detachPreviousTimer();
                 consumed = true;
             }
-            else if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER) {
+            else if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER
+            || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                 DPAD_SELECT_PRESSED = false;
                 detachPreviousTimer();
 //                if (keyEvent.getEventTime() - keyEvent.getDownTime() > 500) {
@@ -411,6 +413,7 @@ public class MouseEmulationEngine {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 //                                injectMotionEvent(InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.ACTION_DOWN, SystemClock.uptimeMillis(), mPointerControl.getPointerLocation().x, mPointerControl.getPointerLocation().y, 1.0f);
 //                                injectMotionEvent(InputDevice.SOURCE_TOUCHSCREEN, MotionEvent.ACTION_UP, SystemClock.uptimeMillis(), mPointerControl.getPointerLocation().x, mPointerControl.getPointerLocation().y, 0.0f);
+                                Log.i(LOG_TAG, "Injected motion event");
                                 mService.shellTap((int) mPointerControl.getPointerLocation().x, (int) mPointerControl.getPointerLocation().y);
                             }
                             else {
