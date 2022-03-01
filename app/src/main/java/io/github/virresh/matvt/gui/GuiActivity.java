@@ -1,5 +1,8 @@
 package io.github.virresh.matvt.gui;
 
+import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.bossKey;
+import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.scrollSpeed;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,15 +23,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.github.virresh.matvt.BuildConfig;
-
 import io.github.virresh.matvt.R;
 import io.github.virresh.matvt.engine.impl.MouseEmulationEngine;
 import io.github.virresh.matvt.engine.impl.PointerControl;
 import io.github.virresh.matvt.helper.Helper;
 import io.github.virresh.matvt.helper.KeyDetection;
-
-import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.bossKey;
-import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.scrollSpeed;
 
 public class GuiActivity extends AppCompatActivity {
     CountDownTimer repopulate;

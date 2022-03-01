@@ -1,5 +1,8 @@
 package io.github.virresh.matvt.services;
 
+import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.bossKey;
+import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.scrollSpeed;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.os.Build;
@@ -11,6 +14,14 @@ import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
+import com.tananaev.adblib.AdbConnection;
+import com.tananaev.adblib.AdbCrypto;
+import com.tananaev.adblib.AdbStream;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
+
 import io.github.virresh.matvt.BuildConfig;
 import io.github.virresh.matvt.engine.impl.MouseEmulationEngine;
 import io.github.virresh.matvt.engine.impl.PointerControl;
@@ -19,21 +30,7 @@ import io.github.virresh.matvt.helper.KeyDetection;
 import io.github.virresh.matvt.view.OverlayView;
 import okhttp3.OkHttpClient;
 
-import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.bossKey;
-import static io.github.virresh.matvt.engine.impl.MouseEmulationEngine.scrollSpeed;
 
-import com.tananaev.adblib.AdbConnection;
-import com.tananaev.adblib.AdbCrypto;
-import com.tananaev.adblib.AdbStream;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.security.NoSuchAlgorithmException;
-import java.util.stream.Collectors;
 
 public class MouseEventService extends AccessibilityService {
 
@@ -42,6 +39,8 @@ public class MouseEventService extends AccessibilityService {
     private Handler adbHandler;
     private Handler mainHandler;
     private HandlerThread adbThread;
+    private AdbConnection adbConnection;
+    private Runnable socketRun;
 
     private AdbCrypto adbCrypto;
 
@@ -85,6 +84,22 @@ public class MouseEventService extends AccessibilityService {
                 adbThread.start();
                 adbHandler = new Handler(adbThread.getLooper());
                 mainHandler = new Handler();
+                // @ybtag - Connect just once on init
+                socketRun = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Socket socket = new Socket("localhost", 5555);
+                            adbConnection = AdbConnection.create(socket, adbCrypto);
+                            adbConnection.connect();
+                            Log.i(TAG_NAME, "Connected to adb...");
+                        } catch (Exception e){
+                            Log.e(TAG_NAME, e.toString());
+                        }
+                    }
+                };
+                adbHandler.post(socketRun);
+
             }
             else {
                 Log.e(TAG_NAME, "Need Greater than Android O (api version 26) to use ADB for input");
@@ -125,12 +140,16 @@ public class MouseEventService extends AccessibilityService {
             Runnable runInput = new Runnable() {
                 @Override
                 public void run() {
-                    AdbConnection adbConnection = null;
+                    //AdbConnection adbConnection = null;
                     AdbStream stream = null;
                     try {
-                        Socket socket = new Socket("localhost", 5555);
-                        adbConnection = AdbConnection.create(socket, adbCrypto);
-                        adbConnection.connect();
+                        //Socket socket = new Socket("localhost", 5555);
+                        //adbConnection = AdbConnection.create(socket, adbCrypto);
+                        //adbConnection.connect();
+                        //@ybtag -- if not connected yet, do it now
+                        if (adbConnection == null)
+                            adbHandler.post(socketRun);
+
                         stream = adbConnection.open("shell:input " + command);
                     } catch (IOException e) {
                         Log.e(TAG_NAME, "Could not create socket for ADB, error: ", e);
@@ -138,20 +157,21 @@ public class MouseEventService extends AccessibilityService {
                         Log.e(TAG_NAME, "ADB Connection Interrupted!", e);
                     } catch (Exception e) {
                         Log.e(TAG_NAME, "Unknown error ---> ", e);
-                    } finally {
+                    }  finally {
                         try {
-                            if (stream != null) {
-                                BufferedReader reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(new ByteArrayInputStream(stream.read()))));
+                            if (stream != null && !stream.isClosed()) {
+                                // @ybtag - streams are closing in the middle of the read for some reason?
+                            //    BufferedReader reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(new ByteArrayInputStream(stream.read()))));
                                 stream.close();
-                                String output = reader.lines().collect(Collectors.joining("\n"));
-                                Log.i(TAG_NAME, "ADB Output --> " + output);
-                                notifyUser(output);
+                              //  String output = reader.lines().collect(Collectors.joining("\n"));
+                               // Log.i(TAG_NAME, "ADB Output --> " + output);
+                              //  notifyUser(output);
                             }
-                            if (adbConnection != null) {
-                                adbConnection.close();
-                            }
+                           // if (adbConnection != null) {
+                             //   adbConnection.close();
+                            //
                             Log.i(TAG_NAME, "Send command " + command + " successfully");
-                        } catch (IOException | InterruptedException e) {
+                        } catch (IOException  e) {
                             Log.e(TAG_NAME, "Connection Close failed! ---> ", e);
                         }
                     }

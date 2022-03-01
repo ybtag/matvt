@@ -19,7 +19,6 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -28,9 +27,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import io.github.virresh.matvt.helper.Helper;
 import io.github.virresh.matvt.services.MouseEventService;
 import io.github.virresh.matvt.view.MouseCursorView;
 import io.github.virresh.matvt.view.OverlayView;
@@ -169,7 +164,7 @@ public class MouseEmulationEngine {
     }
 
     /**
-     * Send input via Android's gestureAPI
+     * Send input via ADB
      * Only sends swipes
      * see {@link MouseEmulationEngine#createClick(PointF, long)} for clicking at a point
      * @param originPoint
@@ -225,9 +220,7 @@ public class MouseEmulationEngine {
                 public void onTick(long l) { }
 
                 @Override
-                public void onFinish() {
-                    mPointerControl.disappear();
-                }
+                public void onFinish() { mPointerControl.disappear(); }
             };
             disappearTimer.start();
         }
@@ -246,20 +239,21 @@ public class MouseEmulationEngine {
         return clickBuilder.build();
     }
 
-    private GestureDescription createSwipe (PointF originPoint, int direction, int momentum) {
+    private void createSwipe (PointF originPoint, int direction, int momentum) {
         final int DURATION = scrollSpeed + 20;
-        Path clickPath = new Path();
+        //Path clickPath = new Path();
         PointF lineDirection = new PointF(originPoint.x + (momentum + 75) * PointerControl.dirX[direction], originPoint.y + (momentum + 75) * PointerControl.dirY[direction]);
 
         mService.shellSwipe((int) originPoint.x, (int) originPoint.y, (int) lineDirection.x, (int) lineDirection.y, DURATION);
 
-        clickPath.moveTo(originPoint.x, originPoint.y);
+        /*clickPath.moveTo(originPoint.x, originPoint.y);
         clickPath.lineTo(lineDirection.x, lineDirection.y);
         GestureDescription.StrokeDescription clickStroke =
                 new GestureDescription.StrokeDescription(clickPath, 0, DURATION);
         GestureDescription.Builder clickBuilder = new GestureDescription.Builder();
         clickBuilder.addStroke(clickStroke);
-        return clickBuilder.build();
+        return clickBuilder.build();*/
+        return;
     }
 
     public boolean perform (KeyEvent keyEvent) {
@@ -332,7 +326,13 @@ public class MouseEmulationEngine {
         if (keyEvent.getAction() == KeyEvent.ACTION_DOWN){
             if (scrollCodeMap.containsKey(keyEvent.getKeyCode())) {
                 if (isInScrollMode || colorSet.contains(keyEvent.getKeyCode()))
-                    attachGesture(mPointerControl.getPointerLocation(), scrollCodeMap.get(keyEvent.getKeyCode()));
+                    //@ybtag -- Don't accept repeating keys for scrolls
+                    if (isInScrollMode) {
+                        if (keyEvent.getRepeatCount() < 1)
+                            attachGesture(mPointerControl.getPointerLocation(), scrollCodeMap.get(keyEvent.getKeyCode()));
+                    }
+                    else
+                        attachGesture(mPointerControl.getPointerLocation(), scrollCodeMap.get(keyEvent.getKeyCode()));
                 else if (!isInScrollMode && stuckAtSide != 0 && keyEvent.getKeyCode() == stuckAtSide)
                     createSwipeForSingle(mPointerControl.getCenterPointOfView(), scrollCodeMap.get(keyEvent.getKeyCode()));
                 else if (movementCodeMap.containsKey(keyEvent.getKeyCode()))

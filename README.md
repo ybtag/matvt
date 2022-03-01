@@ -31,7 +31,7 @@ Use adb to install the app. Then run these commands:
  ```adb shell pm uninstall -k --user 0 com.lge.voicecommand
   adb shell appops set io.github.virresh.matvt SYSTEM_ALERT_WINDOW allow
   adb shell settings put secure accessibility_enabled 1
-  adb shell settings put secure enabled_accessibility_services io.github.virresh.matvt/io.github.virresh.matvt.services.MouseEventService
+  adb shell settings put secure enabled_accessibility_services io.github.virresh.matvt/io.github.virresh.matvt.adb.services.MouseEventService
   adb tcpip 5555
   ```
 
