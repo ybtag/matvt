@@ -24,6 +24,9 @@ Thanks to @hotcereal_twitter for providing more cursor images. [Link](https://gi
 Please note that this project in no way, shape or form is sponsored by anybody. It's a fully independent project with generous folks contributing to it.
 It does not generate any kind of revenue. There are no ads in the app and will never be. There's no tracking code stealing information or any kind of paywall for *extra* features. It is what it is, unless of course you download a MOD. Unless the MOD is open source, there's no guarantee it'll follow the same spirit as the above. The only way to contribute is either by (A) fixing known issues / helping out with code or (B) sponsoring the project
 
+# APK Download 
+The adb version can be downloaded here : [prerelease](https://github.com/ybtag/matvt/releases/download/sonim-xp3-adb/sonim-matvt-adb.apk)
+
 # Installation
 
 Use adb to install the app. Then run these commands:
